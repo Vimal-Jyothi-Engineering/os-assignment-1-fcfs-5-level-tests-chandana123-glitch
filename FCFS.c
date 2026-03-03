@@ -2,24 +2,40 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define MAX 100
+
 int main() {
     int n;
+
+    printf("Enter number of processes: ");
     scanf("%d", &n);
 
-    int pid[100], at[100], bt[100];
-    int wt[100], tat[100];
+    if (n <= 0 || n > MAX) {
+        printf("Invalid number of processes!\n");
+        return 0;
+    }
+
+    int pid[MAX], at[MAX], bt[MAX];
+    int wt[MAX], tat[MAX];
 
     // Input
+    printf("Enter ProcessName ArrivalTime BurstTime\n");
     for (int i = 0; i < n; i++) {
         char pname[20];
         scanf("%s %d %d", pname, &at[i], &bt[i]);
-        pid[i] = atoi(pname + 1);   // Convert P1 -> 1
+
+        // Convert P1 -> 1
+        if (pname[0] == 'P' || pname[0] == 'p')
+            pid[i] = atoi(&pname[1]);
+        else
+            pid[i] = atoi(pname);
     }
 
-    // Sort by arrival time (FCFS rule)
+    // Sort by Arrival Time (FCFS rule)
     for (int i = 0; i < n - 1; i++) {
         for (int j = 0; j < n - i - 1; j++) {
             if (at[j] > at[j + 1]) {
+
                 int temp;
 
                 temp = at[j];
@@ -37,14 +53,13 @@ int main() {
         }
     }
 
-    // FCFS Waiting Time Calculation
+    // FCFS Calculation
     int current_time = 0;
 
     for (int i = 0; i < n; i++) {
 
-        // If CPU is idle, jump to arrival time
         if (current_time < at[i])
-            current_time = at[i];
+            current_time = at[i];   // CPU idle case
 
         wt[i] = current_time - at[i];
         tat[i] = wt[i] + bt[i];
@@ -52,8 +67,9 @@ int main() {
         current_time += bt[i];
     }
 
-    // Average calculation
+    // Calculate averages
     double avgWT = 0, avgTAT = 0;
+
     for (int i = 0; i < n; i++) {
         avgWT += wt[i];
         avgTAT += tat[i];
@@ -63,16 +79,14 @@ int main() {
     avgTAT /= n;
 
     // Output
-    printf("Waiting Time:\n");
-    for (int i = 0; i < n; i++)
-        printf("P%d %d\n", pid[i], wt[i]);
+    printf("\nProcess\tAT\tBT\tWT\tTAT\n");
+    for (int i = 0; i < n; i++) {
+        printf("P%d\t%d\t%d\t%d\t%d\n",
+               pid[i], at[i], bt[i], wt[i], tat[i]);
+    }
 
-    printf("Turnaround Time:\n");
-    for (int i = 0; i < n; i++)
-        printf("P%d %d\n", pid[i], tat[i]);
-
-    printf("Average Waiting Time: %.2f\n", avgWT);
-    printf("Average Turnaround Time: %.2f\n", avgTAT);
+    printf("\nAverage Waiting Time: %.2f", avgWT);
+    printf("\nAverage Turnaround Time: %.2f\n", avgTAT);
 
     return 0;
 }
